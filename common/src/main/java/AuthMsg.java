@@ -1,5 +1,3 @@
-package ru.naztrans;
-
 import java.io.Serializable;
 
 public class AuthMsg implements Serializable {

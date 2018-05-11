@@ -1,0 +1,21 @@
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<VBox fx:id="main" fx:controller="Controller"
+      xmlns:fx="http://javafx.com/fxml" alignment="TOP_LEFT" >
+        <TableView fx:id="table" VBox.vgrow="ALWAYS" editable="false">
+            <columns>
+                <TableColumn fx:id="colFileName" text="Filename"></TableColumn>
+                <TableColumn fx:id="colSize" text="Size"></TableColumn>
+            </columns>
+
+        </TableView>
+    <HBox>
+        <Button text="Upload File" onAction="#uploadFile"></Button>
+        <Button text="Download File"></Button>
+        <Button text="Delete File"></Button>
+    </HBox>
+</VBox>
