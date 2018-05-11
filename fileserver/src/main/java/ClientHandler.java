@@ -49,11 +49,12 @@ public class ClientHandler {
                                         out.writeObject(new AuthMsg(AuthAction.alreadyIn, nick));
                                         continue;
                                     }
-                                    if(nick=="user1" && pass=="pass1")
+                                    if(nick.equals("user1") && pass.equals("pass1"))
                                     {
+                                        System.out.println("Ник и пароль правильные");
                                         out.writeObject(new AuthMsg(AuthAction.success, nick));
                                         server.subscribe(this);
-                                        System.out.println("Клиеннт подключися");
+                                        System.out.println("Клиент подключися");
                                         break;
                                     }
                                 } else {
@@ -74,7 +75,8 @@ public class ClientHandler {
                             obj = in.readObject();
 
                             if (obj instanceof FileClass) {
-                                Files.write(Paths.get(Properties.MAIN_PATH+nick+"\\"+((FileClass) obj).name), ((FileClass) obj).body, StandardOpenOption.CREATE_NEW);
+
+                                Files.write(Paths.get(Properties.MAIN_PATH+nick+"\\"+((FileClass) obj).name), ((FileClass) obj).body, StandardOpenOption.CREATE);
                                 System.out.println("написал файл");
 
                             }
