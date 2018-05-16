@@ -1,3 +1,7 @@
+package ru.naztrans.Filecloud.fileserver;
+
+import ru.naztrans.Filecloud.common.*;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -5,6 +9,9 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+
+
 
 public class ClientHandler {
     private Server server;
@@ -54,7 +61,7 @@ public class ClientHandler {
                                         System.out.println("Ник и пароль правильные");
                                         out.writeObject(new AuthMsg(AuthAction.success, nick));
                                         server.subscribe(this);
-                                        System.out.println("Клиент подключися");
+                                        System.out.println("Клиент авторизован");
                                         break;
                                     }
                                 } else {
@@ -77,8 +84,31 @@ public class ClientHandler {
                             if (obj instanceof FileClass) {
 
                                 Files.write(Paths.get(Properties.MAIN_PATH+nick+"\\"+((FileClass) obj).name), ((FileClass) obj).body, StandardOpenOption.CREATE);
-                                System.out.println("написал файл");
+                                System.out.println("Записан файл"+((FileClass) obj).name);
 
+                            }
+                            if (obj instanceof FileActionMsg) {
+                                FileActionMsg msg = (FileActionMsg)obj;
+                                if (msg.action==FileActions.GETFILELIST){
+                                    System.out.println("Получил запрос на список файлов");
+                                    try {
+                                        ArrayList<FileView> list = new ArrayList<>();
+                                        Files.list(Paths.get(Properties.MAIN_PATH+nick)).filter(s->!Files.isDirectory(s)).forEach(s->{
+
+                                            try {
+                                                list.add(new FileView(s.getFileName().toString(), Files.size(s)));
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                        });
+                                        out.writeObject(new FileListMsg(list));
+                                        System.out.println("Отправил ответ");
+                                    }
+                                    catch (IOException e){
+                                        e.getStackTrace();
+                                    }
+                                }
                             }
                             //if (obj instanceof )
                         } catch (ClassNotFoundException e) {

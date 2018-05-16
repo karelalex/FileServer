@@ -1,3 +1,5 @@
+package ru.naztrans.Filecloud.common;
+
 import java.io.Serializable;
 
 public class AuthMsg implements Serializable {

@@ -1,3 +1,5 @@
+package ru.naztrans.Filecloud.guiclient.gui;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,12 +11,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import javafx.stage.FileChooser;
+import ru.naztrans.Filecloud.common.AuthAction;
+import ru.naztrans.Filecloud.common.AuthMsg;
+import ru.naztrans.Filecloud.guiclient.nonGuiServices.FileActions;
+import ru.naztrans.Filecloud.common.FileView;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 
@@ -59,20 +63,26 @@ public class Controller implements Initializable {
                 public void run() {
                     try {
                         while (true) {
-                            System.out.println("Пешу объект");
+                            System.out.println("Пытаюсь авторизоваться объект");
                             out.writeObject(new AuthMsg(AuthAction.singIn, "user1", "pass1"));
-                            System.out.println("Написал");
+                            System.out.println("Отправил запрос");
                             try {
                                 Object obj=in.readObject();
                                 if (obj instanceof AuthMsg) {
                                     if(((AuthMsg) obj).getAct()==AuthAction.success){
-                                        System.out.println("Подключение успешно");
+                                        System.out.println("Авторизация успешна");
                                         break;
                                     }
                                 }
                             } catch (ClassNotFoundException e) {
                                 e.printStackTrace();
                             }
+                        }
+                        try {
+                            fileList.clear();
+                            fileList.addAll(FileActions.getFileList(in, out));
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
                         }
                         while (true) {
                             try {
@@ -110,4 +120,5 @@ public class Controller implements Initializable {
             e.printStackTrace();
         }
     }
+
 }

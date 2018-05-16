@@ -1,3 +1,5 @@
+package ru.naztrans.Filecloud.guiclient.gui;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

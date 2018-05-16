@@ -1,3 +1,5 @@
+package ru.naztrans.Filecloud.fileserver;
+
 import java.io.IOException;
 
 public class MainClass {

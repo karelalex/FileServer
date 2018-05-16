@@ -1,4 +1,8 @@
-public class FileView {
+package ru.naztrans.Filecloud.common;
+
+import java.io.Serializable;
+
+public class FileView implements Serializable {
     private String fileName;
     private long size;
 
