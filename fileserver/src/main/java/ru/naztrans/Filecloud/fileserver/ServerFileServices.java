@@ -1,5 +1,6 @@
 package ru.naztrans.Filecloud.fileserver;
 
+import ru.naztrans.Filecloud.common.FileClass;
 import ru.naztrans.Filecloud.common.FileView;
 
 import java.io.IOException;
@@ -29,6 +30,16 @@ public class ServerFileServices {
     public static boolean fileExist(String name, String nick) {
         return Files.exists((Paths.get(Properties.MAIN_PATH + nick + "\\" + name)));
     }
+    public static boolean deleteFile(String name, String nick) {
+        try {
+            return Files.deleteIfExists((Paths.get(Properties.MAIN_PATH + nick + "\\" + name)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+            return false;
+
+    }
     public static ArrayList<FileView> getFileList(String nick) throws IOException {
         ArrayList<FileView> list = new ArrayList<>();
         Files.list(Paths.get(Properties.MAIN_PATH + nick)).filter(s -> !Files.isDirectory(s)).forEach(s -> {
@@ -42,4 +53,16 @@ public class ServerFileServices {
         });
         return list;
     };
+
+    public static FileClass createFileObject(String filename, String nick) {
+
+        try {
+            byte[] bytes=Files.readAllBytes(Paths.get(Properties.MAIN_PATH + nick + "\\" + filename));
+            FileClass fc=new FileClass(filename, bytes);
+            return fc;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

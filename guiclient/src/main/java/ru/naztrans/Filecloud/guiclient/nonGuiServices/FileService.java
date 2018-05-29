@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class FileService {
     static public void sendFile(File file, ObjectOutputStream out){
@@ -29,7 +31,29 @@ public class FileService {
 
 
     }
-    static public void saveFile(){
+    static public void saveFile(File file, byte[] body){
+        Path p=file.toPath();
+        try {
+            Files.write(p, body, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE_NEW);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    static public void deleteFile(String filename, ObjectOutputStream out) {
+        FileActionMsg msg = new FileActionMsg(FileActions.DELETE, filename);
+        try {
+            out.writeObject(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public static void askFile(String fileName, ObjectOutputStream out) {
+        FileActionMsg msg = new FileActionMsg(FileActions.GET, fileName);
+        try {
+            out.writeObject(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

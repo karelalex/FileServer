@@ -1,5 +1,6 @@
 package ru.naztrans.Filecloud.guiclient.gui;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,11 +12,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import javafx.stage.FileChooser;
-import ru.naztrans.Filecloud.common.AuthAction;
-import ru.naztrans.Filecloud.common.AuthMsg;
-import ru.naztrans.Filecloud.common.FileListMsg;
+import ru.naztrans.Filecloud.common.*;
 import ru.naztrans.Filecloud.guiclient.nonGuiServices.FileService;
-import ru.naztrans.Filecloud.common.FileView;
 
 import java.io.*;
 import java.net.Socket;
@@ -51,6 +49,18 @@ public class Controller implements Initializable {
 
 
     }
+    public void deleteFile() {
+        FileView selected=table.getSelectionModel().getSelectedItem();
+        if (selected!=null){
+            FileService.deleteFile(selected.getFileName(), out);
+        }
+    }
+    public void downloadFile(){
+        FileView selected=table.getSelectionModel().getSelectedItem();
+        if (selected!=null){
+            FileService.askFile(selected.getFileName(), out);
+        }
+    }
     public void connect() {
         try {
             socket = new Socket("localhost", 8189);
@@ -63,7 +73,7 @@ public class Controller implements Initializable {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        while (true) {
+
 
                             out.writeObject(new AuthMsg(AuthAction.singIn, "user1", "pass1"));
                             System.out.println("Отправил запрос");
@@ -72,13 +82,13 @@ public class Controller implements Initializable {
                                 if (obj instanceof AuthMsg) {
                                     if(((AuthMsg) obj).getAct()==AuthAction.success){
                                         System.out.println("Авторизация успешна");
-                                        break;
+
                                     }
                                 }
                             } catch (ClassNotFoundException e) {
                                 e.printStackTrace();
                             }
-                        }
+
                         try {
                             FileService.getFileList(out);
                         } catch (IOException e) {
@@ -91,8 +101,27 @@ public class Controller implements Initializable {
                                 Object obj=in.readObject();
                                 if (obj instanceof FileListMsg){
                                     FileListMsg message=(FileListMsg)obj;
-                                    fileList.clear();
-                                    fileList.addAll(message.fileList);
+                                    System.out.println("Обновляю лист файлов");
+                                    Platform.runLater(()->{ //так не вылетае ошибка о неверном потоке
+                                        fileList.clear();
+                                        fileList.addAll(message.fileList);
+                                            }
+
+                                    );
+
+
+                                }
+                                if (obj instanceof FileClass) {
+                                    FileClass fc = (FileClass)obj;
+                                    FileChooser fileChooser = new FileChooser();
+                                    fileChooser.setInitialFileName(fc.name);
+                                    Platform.runLater(()->{
+                                        File file=fileChooser.showSaveDialog(table.getScene().getWindow());
+                                        FileService.saveFile(file, fc.body);
+                                    });
+
+
+
 
                                 }
                             } catch (ClassNotFoundException e) {

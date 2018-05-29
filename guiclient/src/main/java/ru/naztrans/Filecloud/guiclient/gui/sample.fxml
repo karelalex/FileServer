@@ -15,7 +15,7 @@
         </TableView>
     <HBox>
         <Button text="Upload File" onAction="#uploadFile"></Button>
-        <Button text="Download File"></Button>
-        <Button text="Delete File"></Button>
+        <Button text="Download File" onAction="#downloadFile"></Button>
+        <Button text="Delete File" onAction="#deleteFile"></Button>
     </HBox>
 </VBox>

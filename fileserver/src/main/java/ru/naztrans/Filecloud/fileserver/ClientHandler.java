@@ -84,6 +84,15 @@ public class ClientHandler {
                                         sendFileList();
 
                                     }
+                                    if (msg.action==FileActions.DELETE){
+                                        if (ServerFileServices.deleteFile(msg.filename, nick)) sendFileList();
+                                    }
+                                    if (msg.action==FileActions.GET){
+                                        FileClass fc=ServerFileServices.createFileObject(msg.filename, nick);
+                                        if (fc!=null) {
+                                            out.writeObject(fc);
+                                        }
+                                    }
                                 }
                             }
                             else out.writeObject(new AuthMsg(AuthAction.requireAuth));
@@ -122,7 +131,7 @@ public class ClientHandler {
         try {
 
             out.writeObject(new FileListMsg(ServerFileServices.getFileList(nick)));
-            System.out.println("Отправил ответ");
+            System.out.println("Отправил список файлов");
         } catch (IOException e) {
             e.getStackTrace();
         }
