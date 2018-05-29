@@ -13,7 +13,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import ru.naztrans.Filecloud.common.AuthAction;
 import ru.naztrans.Filecloud.common.AuthMsg;
-import ru.naztrans.Filecloud.guiclient.nonGuiServices.FileActions;
+import ru.naztrans.Filecloud.common.FileListMsg;
+import ru.naztrans.Filecloud.guiclient.nonGuiServices.FileService;
 import ru.naztrans.Filecloud.common.FileView;
 
 import java.io.*;
@@ -46,7 +47,7 @@ public class Controller implements Initializable {
     public void uploadFile() {
         FileChooser fileChooser = new FileChooser();
         File f=fileChooser.showOpenDialog(table.getScene().getWindow());
-        FileActions.sendFile(f, out);
+        FileService.sendFile(f, out);
 
 
     }
@@ -63,7 +64,7 @@ public class Controller implements Initializable {
                 public void run() {
                     try {
                         while (true) {
-                            System.out.println("Пытаюсь авторизоваться объект");
+
                             out.writeObject(new AuthMsg(AuthAction.singIn, "user1", "pass1"));
                             System.out.println("Отправил запрос");
                             try {
@@ -79,14 +80,21 @@ public class Controller implements Initializable {
                             }
                         }
                         try {
-                            fileList.clear();
-                            fileList.addAll(FileActions.getFileList(in, out));
-                        } catch (ClassNotFoundException e) {
+                            FileService.getFileList(out);
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
+
+
                         while (true) {
                             try {
-                                in.readObject();
+                                Object obj=in.readObject();
+                                if (obj instanceof FileListMsg){
+                                    FileListMsg message=(FileListMsg)obj;
+                                    fileList.clear();
+                                    fileList.addAll(message.fileList);
+
+                                }
                             } catch (ClassNotFoundException e) {
                                 e.printStackTrace();
                             }

@@ -12,7 +12,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
 
-
 public class ClientHandler {
     private Server server;
     private Socket socket;
@@ -24,7 +23,6 @@ public class ClientHandler {
     public String getNick() {
         return nick;
     }
-
 
 
     public ClientHandler(Server server, Socket socket) {
@@ -44,82 +42,59 @@ public class ClientHandler {
                             obj = in.readObject();
                             System.out.println("Читаю Объект");
 
-                        if (obj instanceof AuthMsg) {
-                            AuthMsg msg = (AuthMsg)obj;
-                            if(msg.getAct()==AuthAction.singIn){
-                                nick=msg.getUsername();
-                                System.out.println(nick);
-                                String pass=msg.getPassword();
-                                System.out.println(pass);
-                                if (nick != null) {
-                                    if (server.isNickBusy(nick)) {
+                            if (obj instanceof AuthMsg) {
+                                AuthMsg msg = (AuthMsg) obj;
+                                if (msg.getAct() == AuthAction.singIn) {
+                                    String username = msg.getUsername();
+                                    String pass = msg.getPassword();
+
+
+                                    if (server.isNickBusy(username)) {
                                         out.writeObject(new AuthMsg(AuthAction.alreadyIn, nick));
                                         continue;
                                     }
-                                    if(nick.equals("user1") && pass.equals("pass1"))
-                                    {
+                                    if (AuthService.checkUser(username, pass)) {
                                         System.out.println("Ник и пароль правильные");
-                                        out.writeObject(new AuthMsg(AuthAction.success, nick));
+                                        out.writeObject(new AuthMsg(AuthAction.success, username));
+                                        nick = username;
                                         server.subscribe(this);
                                         System.out.println("Клиент авторизован");
-                                        break;
+                                        continue;
+                                    } else {
+                                        out.writeObject(new AuthMsg(AuthAction.wrongCredits, nick));
+                                        continue;
                                     }
-                                } else {
-                                    out.writeObject(new AuthMsg(AuthAction.wrongCredits, nick));
+
+                                }
+
+
+                            }
+                            if (nick != null) {
+                                if (obj instanceof FileClass) {
+
+                                    ServerFileServices.writeFile(((FileClass) obj).name, nick, ((FileClass) obj).body);
+                                    sendFileList();
+
+                                }
+                                if (obj instanceof FileActionMsg) {
+
+                                    FileActionMsg msg = (FileActionMsg) obj;
+                                    if (msg.action == FileActions.GETFILELIST) {
+                                        System.out.println("Получил запрос на список файлов");
+                                        sendFileList();
+
+                                    }
                                 }
                             }
-
-
-                        }
-                        else out.writeObject(new AuthMsg(AuthAction.requireAuth));
+                            else out.writeObject(new AuthMsg(AuthAction.requireAuth));
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         }
                     }
-                    while (true) {
-                        Object obj = null;
-                        try {
-                            obj = in.readObject();
 
-                            if (obj instanceof FileClass) {
-
-                                Files.write(Paths.get(Properties.MAIN_PATH+nick+"\\"+((FileClass) obj).name), ((FileClass) obj).body, StandardOpenOption.CREATE);
-                                System.out.println("Записан файл"+((FileClass) obj).name);
-
-                            }
-                            if (obj instanceof FileActionMsg) {
-                                FileActionMsg msg = (FileActionMsg)obj;
-                                if (msg.action==FileActions.GETFILELIST){
-                                    System.out.println("Получил запрос на список файлов");
-                                    try {
-                                        ArrayList<FileView> list = new ArrayList<>();
-                                        Files.list(Paths.get(Properties.MAIN_PATH+nick)).filter(s->!Files.isDirectory(s)).forEach(s->{
-
-                                            try {
-                                                list.add(new FileView(s.getFileName().toString(), Files.size(s)));
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            }
-
-                                        });
-                                        out.writeObject(new FileListMsg(list));
-                                        System.out.println("Отправил ответ");
-                                    }
-                                    catch (IOException e){
-                                        e.getStackTrace();
-                                    }
-                                }
-                            }
-                            //if (obj instanceof )
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    }
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-
-                finally {
+                } finally {
                     server.unsubscribe(this);
                     try {
                         socket.close();
@@ -143,5 +118,14 @@ public class ClientHandler {
         }
     }
 
+    void sendFileList() {
+        try {
+
+            out.writeObject(new FileListMsg(ServerFileServices.getFileList(nick)));
+            System.out.println("Отправил ответ");
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
+    }
 
 }

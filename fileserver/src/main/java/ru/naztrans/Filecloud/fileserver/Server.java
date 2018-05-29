@@ -12,7 +12,7 @@ public class Server {
 
     public Server() {
         try {
-            //SQLHandler.connect();
+            SQLService.init();
             serverSocket = new ServerSocket(8189);
             clients = new Vector<ClientHandler>();
             System.out.println("Сервер запущен");
@@ -29,7 +29,7 @@ public class Server {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            //SQLHandler.disconnect();
+            SQLService.quit();
         }
     }
 
@@ -41,12 +41,12 @@ public class Server {
 
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
-        //broadcastClientsList();
+
     }
 
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
-        //broadcastClientsList();
+
     }
 
     public boolean isNickBusy(String nick) {
