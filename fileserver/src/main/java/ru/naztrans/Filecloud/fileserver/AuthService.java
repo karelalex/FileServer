@@ -5,6 +5,6 @@ public class AuthService {
         return name.equals(SQLService.getUser(name, password));
     }
     public static boolean addUser(String name, String password) {
-        return false;
+        return SQLService.addUser(name,password);
     }
 }

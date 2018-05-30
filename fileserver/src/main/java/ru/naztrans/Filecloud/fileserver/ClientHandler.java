@@ -66,6 +66,18 @@ public class ClientHandler {
                                     }
 
                                 }
+                                if (msg.getAct()==AuthAction.SING_UP){
+                                    String username = msg.getUsername();
+                                    String pass = msg.getPassword();
+                                    if (ServerFileServices.createDIR(username) && AuthService.addUser(username, pass)){
+                                        out.writeObject(new AuthMsg(AuthAction.LOGIN_SUCCESS, username));
+                                        nick = username;
+                                        server.subscribe(this);
+                                    };
+                                }
+                                if (msg.getAct()==AuthAction.LOG_OFF){
+                                    socket.close();
+                                }
 
 
                             }

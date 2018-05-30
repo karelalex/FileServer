@@ -262,4 +262,18 @@ public class Controller implements Initializable {
             }
 
     }
+
+    public void logOff() {
+        try {
+            out.writeObject(new AuthMsg(AuthAction.LOG_OFF));
+            Platform.runLater(()->{
+                loginField.clear();
+                passField.clear();
+                secondPassField.clear();
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

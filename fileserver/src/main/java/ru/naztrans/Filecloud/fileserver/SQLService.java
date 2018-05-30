@@ -18,6 +18,11 @@ public class SQLService {
 
     }
     public static boolean addUser (String  name, String pass) {
+        try {
+            return stat.executeUpdate(String.format("INSERT into users values ('%s', '%s')", name, pass))>0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
     }
     static boolean userExist(String name){

@@ -83,4 +83,15 @@ public class ServerFileServices {
         return false;
 
     }
+
+    public static boolean createDIR(String username) {
+        Path dirname=Paths.get(Properties.MAIN_PATH + username);
+        try {
+            Files.createDirectory(dirname);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
