@@ -44,24 +44,24 @@ public class ClientHandler {
 
                             if (obj instanceof AuthMsg) {
                                 AuthMsg msg = (AuthMsg) obj;
-                                if (msg.getAct() == AuthAction.singIn) {
+                                if (msg.getAct() == AuthAction.SING_IN) {
                                     String username = msg.getUsername();
                                     String pass = msg.getPassword();
 
 
                                     if (server.isNickBusy(username)) {
-                                        out.writeObject(new AuthMsg(AuthAction.alreadyIn, nick));
+                                        out.writeObject(new AuthMsg(AuthAction.ALREADY_IN, nick));
                                         continue;
                                     }
                                     if (AuthService.checkUser(username, pass)) {
                                         System.out.println("Ник и пароль правильные");
-                                        out.writeObject(new AuthMsg(AuthAction.success, username));
+                                        out.writeObject(new AuthMsg(AuthAction.LOGIN_SUCCESS, username));
                                         nick = username;
                                         server.subscribe(this);
                                         System.out.println("Клиент авторизован");
                                         continue;
                                     } else {
-                                        out.writeObject(new AuthMsg(AuthAction.wrongCredits, nick));
+                                        out.writeObject(new AuthMsg(AuthAction.WRONG_CREDITS, nick));
                                         continue;
                                     }
 
@@ -95,7 +95,7 @@ public class ClientHandler {
                                     }
                                 }
                             }
-                            else out.writeObject(new AuthMsg(AuthAction.requireAuth));
+                            else out.writeObject(new AuthMsg(AuthAction.REQUIRE_AUTH));
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         }

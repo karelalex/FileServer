@@ -4,12 +4,15 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.PasswordField?>
 <VBox fx:id="main" fx:controller="ru.naztrans.Filecloud.guiclient.gui.Controller"
       xmlns:fx="http://javafx.com/fxml" alignment="TOP_LEFT" >
-        <TableView fx:id="table" VBox.vgrow="ALWAYS" editable="false">
+        <VBox fx:id="fileControls" managed="false" visible="false">
+            <TableView fx:id="table" VBox.vgrow="ALWAYS" editable="false">
             <columns>
-                <TableColumn fx:id="colFileName" text="Filename"></TableColumn>
-                <TableColumn fx:id="colSize" text="Size"></TableColumn>
+                <TableColumn fx:id="colFileName" text="Filename" />
+                <TableColumn fx:id="colSize" text="Size" />
             </columns>
 
         </TableView>
@@ -18,4 +21,16 @@
         <Button text="Download File" onAction="#downloadFile"></Button>
         <Button text="Delete File" onAction="#deleteFile"></Button>
     </HBox>
+        </VBox>
+    <VBox fx:id="authControls">
+        <HBox>
+            <TextField fx:id="loginField" promptText="Логин" HBox.hgrow="ALWAYS" />
+            <PasswordField fx:id="passField"  promptText="Пароль" HBox.hgrow="ALWAYS" />
+            <PasswordField fx:id="secondPassField" promptText="Повторить пароль" visible="false" managed="false"/>
+
+        </HBox>
+        <Button onAction="#sendAuth" text="Авторизоваться" />
+        <Button onAction="#enterNewUser" text="Новый пользователь" />
+        <Button onAction="#createNewUser" text="Создать" visible="false" managed="false"/>
+    </VBox>
 </VBox>

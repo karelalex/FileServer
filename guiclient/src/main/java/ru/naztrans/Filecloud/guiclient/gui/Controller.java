@@ -3,14 +3,17 @@ package ru.naztrans.Filecloud.guiclient.gui;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import ru.naztrans.Filecloud.common.*;
 import ru.naztrans.Filecloud.guiclient.nonGuiServices.FileService;
@@ -34,13 +37,32 @@ public class Controller implements Initializable {
     @FXML
     private TableView<FileView> table;
 
+    @FXML
+    private TextField loginField;
+
+    @FXML
+    private TextField passField;
+
+    @FXML
+    private TextField secondPassFieald;
+
+    @FXML
+    private VBox authControls;
+
+    @FXML
+
+    private VBox fileControls;
+
+    private boolean authorized;
+
     public void initialize(URL location, ResourceBundle resources) {
         fileList = FXCollections.observableArrayList();
         colFileName.setCellValueFactory(new PropertyValueFactory<FileView, String>("fileName"));
         colSize.setCellValueFactory(new PropertyValueFactory<FileView, Long>("size"));
 
         table.setItems(fileList);
-       connect();
+
+
     }
     public void uploadFile() {
         FileChooser fileChooser = new FileChooser();
@@ -74,31 +96,17 @@ public class Controller implements Initializable {
                 public void run() {
                     try {
 
+                        while (true) {
 
-                            out.writeObject(new AuthMsg(AuthAction.singIn, "user1", "pass1"));
-                            System.out.println("Отправил запрос");
                             try {
                                 Object obj=in.readObject();
                                 if (obj instanceof AuthMsg) {
-                                    if(((AuthMsg) obj).getAct()==AuthAction.success){
+                                    if(((AuthMsg) obj).getAct()==AuthAction.LOGIN_SUCCESS){
                                         System.out.println("Авторизация успешна");
-
+                                        setAuthorized(true);
+                                        FileService.askFilelist(out);
                                     }
                                 }
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-
-                        try {
-                            FileService.getFileList(out);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-
-                        while (true) {
-                            try {
-                                Object obj=in.readObject();
                                 if (obj instanceof FileListMsg){
                                     FileListMsg message=(FileListMsg)obj;
                                     System.out.println("Обновляю лист файлов");
@@ -158,4 +166,35 @@ public class Controller implements Initializable {
         }
     }
 
+    private void setAuthorized(boolean b) {
+        this.authorized = b;
+        if (this.authorized) {
+            authControls.setVisible(false);
+            authControls.setManaged(false);
+            fileControls.setVisible(true);
+            fileControls.setManaged(true);
+
+        } else {
+            authControls.setVisible(true);
+            authControls.setManaged(true);
+            fileControls.setVisible(false);
+            fileControls.setManaged(false);
+            String loginnick = "";
+        }
+    }
+
+    public void sendAuth() {
+        connect();
+        try {
+            out.writeObject(new AuthMsg(AuthAction.SING_IN, loginField.getText(), passField.getText()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void enterNewUser(ActionEvent actionEvent) {
+    }
+
+    public void createNewUser(ActionEvent actionEvent) {
+    }
 }

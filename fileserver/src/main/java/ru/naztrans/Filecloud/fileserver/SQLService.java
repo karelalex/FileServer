@@ -20,6 +20,18 @@ public class SQLService {
     public static boolean addUser (String  name, String pass) {
         return false;
     }
+    static boolean userExist(String name){
+        try {
+            ResultSet rs = stat.executeQuery(String.format(
+                    "SELECT name FROM users WHERE name='%s';", name
+            ));
+            return rs.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     public static String getUser (String name, String pass) {
         try {
             ResultSet rs = stat.executeQuery(String.format(

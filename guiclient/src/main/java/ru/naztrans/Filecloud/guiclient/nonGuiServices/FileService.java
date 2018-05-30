@@ -56,4 +56,12 @@ public class FileService {
             e.printStackTrace();
         }
     }
+
+    public static void askFilelist(ObjectOutputStream out) {
+        try {
+            out.writeObject(new FileActionMsg(FileActions.GETFILELIST, ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

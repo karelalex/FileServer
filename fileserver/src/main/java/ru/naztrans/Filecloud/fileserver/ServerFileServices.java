@@ -12,10 +12,14 @@ import java.util.ArrayList;
 public class ServerFileServices {
     public static boolean writeFile (String name, String  nick, byte[] body){
         int i=1;
-        while (fileExist(name, nick)) {
-            name+=i;
+        String tempname=name;
+        while (fileExist(tempname, nick)) {
+            String[] tokens = name.split("\\.(?=[^\\.]+$)");
+            tokens[0]+="("+i+")";
             i++;
+            tempname=tokens[0]+"."+tokens[1];
         }
+        name=tempname;
         try {
             Files.write(Paths.get(Properties.MAIN_PATH + nick + "\\" + name), body, StandardOpenOption.CREATE);
             System.out.println("Записан файл" + name);
