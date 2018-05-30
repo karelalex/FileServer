@@ -6,11 +6,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 
 
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import javafx.scene.layout.VBox;
@@ -21,10 +19,22 @@ import ru.naztrans.Filecloud.guiclient.nonGuiServices.FileService;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 
 public class Controller implements Initializable {
+
+    @FXML
+    public Label firstLabel;
+    @FXML
+    private Label authLabel;
+    @FXML
+    private Button authBtn;
+    @FXML
+    private Button nuBTN;
+    @FXML
+    private Button createNUBTN;
     private ObservableList<FileView> fileList;
     private Socket socket;
     ObjectInputStream in;
@@ -44,7 +54,7 @@ public class Controller implements Initializable {
     private TextField passField;
 
     @FXML
-    private TextField secondPassFieald;
+    private TextField secondPassField;
 
     @FXML
     private VBox authControls;
@@ -54,6 +64,7 @@ public class Controller implements Initializable {
     private VBox fileControls;
 
     private boolean authorized;
+    private boolean connected;
 
     public void initialize(URL location, ResourceBundle resources) {
         fileList = FXCollections.observableArrayList();
@@ -87,75 +98,90 @@ public class Controller implements Initializable {
         try {
             socket = new Socket("localhost", 8189);
             System.out.println("Подключился");
+            connected=true;
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
 
 
             System.out.println("создал стримы");
-            Thread t = new Thread(new Runnable() {
-                public void run() {
-                    try {
+            Thread t = new Thread(() -> {
+                try {
 
-                        while (true) {
+                    while (true) {
 
-                            try {
-                                Object obj=in.readObject();
-                                if (obj instanceof AuthMsg) {
-                                    if(((AuthMsg) obj).getAct()==AuthAction.LOGIN_SUCCESS){
-                                        System.out.println("Авторизация успешна");
-                                        setAuthorized(true);
-                                        FileService.askFilelist(out);
-                                    }
-                                }
-                                if (obj instanceof FileListMsg){
-                                    FileListMsg message=(FileListMsg)obj;
-                                    System.out.println("Обновляю лист файлов");
-                                    Platform.runLater(()->{ //так не вылетае ошибка о неверном потоке
-                                        fileList.clear();
-                                        fileList.addAll(message.fileList);
-                                            }
-
-                                    );
-
-
-                                }
-                                if (obj instanceof FileClass) {
-                                    FileClass fc = (FileClass)obj;
-                                    FileChooser fileChooser = new FileChooser();
-                                    fileChooser.setInitialFileName(fc.name);
+                        try {
+                            Object obj=in.readObject();
+                            if (obj instanceof AuthMsg) {
+                                if(((AuthMsg) obj).getAct()==AuthAction.LOGIN_SUCCESS){
+                                    System.out.println("Авторизация успешна");
+                                    setAuthorized(true);
                                     Platform.runLater(()->{
-                                        File file=fileChooser.showSaveDialog(table.getScene().getWindow());
-                                        FileService.saveFile(file, fc.body);
-                                    });
-
-
-
-
+                                        firstLabel.setText("Вход выполнен пользователем: "+((AuthMsg) obj).getUsername());
+                                            }
+                                    );
+                                    FileService.askFilelist(out);
                                 }
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
+                                if (((AuthMsg) obj).getAct()==AuthAction.NICK_BUSY){
+                                    authLabel.setText("Имя пользователя занято");
+                                }
+                                if (((AuthMsg) obj).getAct()==AuthAction.ALREADY_IN){
+                                    authLabel.setText("Пользователь уже в сети");
+                                }
+                                if (((AuthMsg) obj).getAct()==AuthAction.REQUIRE_AUTH){
+                                    setAuthorized(false);
+                                }
+
+
                             }
+                            if (obj instanceof FileListMsg){
+                                FileListMsg message=(FileListMsg)obj;
+                                System.out.println("Обновляю лист файлов");
+                                Platform.runLater(()->{ //так не вылетает ошибка о неверном потоке
+                                    fileList.clear();
+                                    fileList.addAll(message.fileList);
+                                        }
+
+                                );
+
+
+                            }
+                            if (obj instanceof FileClass) {
+                                FileClass fc = (FileClass)obj;
+                                FileChooser fileChooser = new FileChooser();
+                                fileChooser.setInitialFileName(fc.name);
+                                Platform.runLater(()->{
+                                    File file=fileChooser.showSaveDialog(table.getScene().getWindow());
+                                    FileService.saveFile(file, fc.body);
+                                });
+
+
+
+
+                            }
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
                         }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    //showAlert("Произошло отключение от сервера");
+                    setAuthorized(false);
+                    connected=false;
+                    try {
+                        socket.close();
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } finally {
-                        //showAlert("Произошло отключение от сервера");
-                        //setAuthorized(false);
-                        try {
-                            socket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            out.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    }
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             });
@@ -184,7 +210,7 @@ public class Controller implements Initializable {
     }
 
     public void sendAuth() {
-        connect();
+        if (!connected) connect();
         try {
             out.writeObject(new AuthMsg(AuthAction.SING_IN, loginField.getText(), passField.getText()));
         } catch (IOException e) {
@@ -192,9 +218,48 @@ public class Controller implements Initializable {
         }
     }
 
-    public void enterNewUser(ActionEvent actionEvent) {
+    public void enterNewUser() {
+        secondPassField.setVisible(true);
+        secondPassField.setManaged(true);
+        authBtn.setVisible(false);
+        nuBTN.setVisible(false);
+        authBtn.setManaged(false);
+        nuBTN.setManaged(false);
+        createNUBTN.setManaged(true);
+        createNUBTN.setVisible(true);
+        }
+
+    public void createNewUser() {
+        if (!passField.getText().equals(secondPassField.getText())){
+            authLabel.setText("Не совпадают пароли");
+        }
+        else {
+            if(!connected) connect();
+            try {
+                out.writeObject(new AuthMsg(AuthAction.SING_UP, loginField.getText(), passField.getText()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void createNewUser(ActionEvent actionEvent) {
+    public void renameFile() {
+        FileView selected=table.getSelectionModel().getSelectedItem();
+
+            if (selected!=null){
+                TextInputDialog tid=new TextInputDialog();
+                tid.setTitle("Переименование");
+                tid.setHeaderText("Введите новое имя файла");
+                tid.setContentText("Имя:");
+                Optional<String> result=tid.showAndWait();
+                if (result.isPresent()){
+                    if (!(result.get().equals(""))){
+                        FileService.renameFile(selected.getFileName(), result.get(), out);
+                    }
+                }
+
+
+            }
+
     }
 }

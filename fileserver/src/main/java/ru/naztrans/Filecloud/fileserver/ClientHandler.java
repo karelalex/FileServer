@@ -87,6 +87,9 @@ public class ClientHandler {
                                     if (msg.action==FileActions.DELETE){
                                         if (ServerFileServices.deleteFile(msg.filename, nick)) sendFileList();
                                     }
+                                    if (msg.action==FileActions.RENAME){
+                                        if (ServerFileServices.renameFile(msg.filename, msg.newFilename, nick)) sendFileList();
+                                    }
                                     if (msg.action==FileActions.GET){
                                         FileClass fc=ServerFileServices.createFileObject(msg.filename, nick);
                                         if (fc!=null) {

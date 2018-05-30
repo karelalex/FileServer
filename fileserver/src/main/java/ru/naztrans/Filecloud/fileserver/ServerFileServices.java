@@ -4,9 +4,7 @@ import ru.naztrans.Filecloud.common.FileClass;
 import ru.naztrans.Filecloud.common.FileView;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 
 public class ServerFileServices {
@@ -68,5 +66,21 @@ public class ServerFileServices {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static boolean renameFile(String filename, String newFilename, String nick) {
+        Path oldPath=Paths.get(Properties.MAIN_PATH + nick + "\\" + filename);
+        Path newPath=Paths.get(Properties.MAIN_PATH + nick + "\\" + newFilename);
+        if (!fileExist(newFilename, nick)) {
+            try {
+                Files.move(oldPath, newPath);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return false;
+
     }
 }

@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
@@ -60,6 +59,14 @@ public class FileService {
     public static void askFilelist(ObjectOutputStream out) {
         try {
             out.writeObject(new FileActionMsg(FileActions.GETFILELIST, ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void renameFile(String fileName, String newName, ObjectOutputStream out) {
+        try {
+            out.writeObject(new FileActionMsg(FileActions.RENAME, fileName, newName));
         } catch (IOException e) {
             e.printStackTrace();
         }

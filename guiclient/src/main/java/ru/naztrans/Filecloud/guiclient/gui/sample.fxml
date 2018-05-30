@@ -6,20 +6,23 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Label?>
 <VBox fx:id="main" fx:controller="ru.naztrans.Filecloud.guiclient.gui.Controller"
       xmlns:fx="http://javafx.com/fxml" alignment="TOP_LEFT" >
-        <VBox fx:id="fileControls" managed="false" visible="false">
-            <TableView fx:id="table" VBox.vgrow="ALWAYS" editable="false">
+        <VBox fx:id="fileControls" managed="false" visible="false" >
+            <Label fx:id="firstLabel" />
+            <TableView fx:id="table" VBox.vgrow="ALWAYS" editable="false" >
             <columns>
-                <TableColumn fx:id="colFileName" text="Filename" />
+                <TableColumn fx:id="colFileName" text="Filename" prefWidth="200"/>
                 <TableColumn fx:id="colSize" text="Size" />
             </columns>
 
         </TableView>
     <HBox>
-        <Button text="Upload File" onAction="#uploadFile"></Button>
-        <Button text="Download File" onAction="#downloadFile"></Button>
-        <Button text="Delete File" onAction="#deleteFile"></Button>
+        <Button text="Upload File" onAction="#uploadFile"/>
+        <Button text="Download File" onAction="#downloadFile"/>
+        <Button text="Delete File" onAction="#deleteFile" />
+        <Button text="Rename File" onAction="#renameFile"/>
     </HBox>
         </VBox>
     <VBox fx:id="authControls">
@@ -29,8 +32,9 @@
             <PasswordField fx:id="secondPassField" promptText="Повторить пароль" visible="false" managed="false"/>
 
         </HBox>
-        <Button onAction="#sendAuth" text="Авторизоваться" />
-        <Button onAction="#enterNewUser" text="Новый пользователь" />
-        <Button onAction="#createNewUser" text="Создать" visible="false" managed="false"/>
+        <Button fx:id="authBtn" onAction="#sendAuth" text="Авторизоваться" />
+        <Button fx:id="nuBTN" onAction="#enterNewUser" text="Новый пользователь" />
+        <Button fx:id="createNUBTN" onAction="#createNewUser" text="Создать" visible="false" managed="false"/>
+        <Label fx:id="authLabel" text="Введите данные польователя"/>
     </VBox>
 </VBox>
